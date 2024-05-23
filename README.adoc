@@ -3,15 +3,20 @@
 // 2. Update the issues link in Contributing section in the readme file
 // 3. Update the discussion link in config.yml file in .github/ISSUE_TEMPLATE directory
 
-= repo-template
+= Java Operating System Statistics (jos_01)
 
 // Add a short description of your project. Tell what your project does and what it's used for.
 
-This is a template repository for Teragrep organization.
+This project will extract statistics from the operating system into Java objects.
+You can use this to easily get information such as memory usage about running processes and the operating system itself.
 
 == Features
 
 // List your project's features
+
+Check if a process is alive using process id.
+Get statistics on the OS or any running process using your system's /proc files as the source.
+High level functions calculate process performance statistics automatically, such as residentSetSize()
 
 == Documentation
 
@@ -23,13 +28,14 @@ See the official documentation on https://docs.teragrep.com[docs.teragrep.com].
 
 == How to [compile/use/implement]
 
+TBD
 // add instructions how people can start to use your project
 
 == Contributing
 
 // Change the repository name in the issues link to match with your project's name
 
-You can involve yourself with our project by https://github.com/teragrep/repo-template/issues/new/choose[opening an issue] or submitting a pull request.
+You can involve yourself with our project by https://github.com/teragrep/jos_01/issues/new/choose[opening an issue] or submitting a pull request.
 
 Contribution requirements:
 

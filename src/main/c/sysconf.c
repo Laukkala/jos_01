@@ -1,6 +1,6 @@
 /*
- * ExtractFields plugin for Pentaho PTH-04
- * Copyright (C) 2021  Fail-Safe IT Solutions Oy
+ * Sysconf plugin for Java Operating System Statistics JOS-01
+ * Copyright (C) 2024  Fail-Safe IT Solutions Oy
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

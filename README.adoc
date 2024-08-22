@@ -1,22 +1,17 @@
-// Before publishing your new repository:
-// 1. Write the readme file
-// 2. Update the issues link in Contributing section in the readme file
-// 3. Update the discussion link in config.yml file in .github/ISSUE_TEMPLATE directory
-
 = Java Operating System Statistics (jos_01)
 
-// Add a short description of your project. Tell what your project does and what it's used for.
-
-This project will extract statistics from the operating system into Java objects.
+This project will extract statistics from the operating system and running processes into Java objects.
 You can use this to easily get information such as memory usage about running processes and the operating system itself.
+The information provided is based on the Linux filesystem's `/proc` files.
 
 == Features
 
-// List your project's features
+- Can be used to check if a process is alive by using process ID.
+- Provides the statistics of OS or any running process by using your system's `/proc` files as the source of truth.
+- Provides high level methods that calculate OS or process performance statistics automatically, such as `residentSetSize()`.
+- Can be used to create Java objects representing the current state of a `/proc` file and get access to the file's values.
 
-Check if a process is alive using process id.
-Get statistics on the OS or any running process using your system's /proc files as the source.
-High level functions calculate process performance statistics automatically, such as residentSetSize()
+This project can be used to easily create system or process monitoring solutions in Java applications.
 
 == Documentation
 
@@ -24,16 +19,70 @@ See the official documentation on https://docs.teragrep.com[docs.teragrep.com].
 
 == Limitations
 
-// If your project has limitations, please list them. Otherwise remove this section.
+- Only supports Linux-based operating systems
+- Requires access to `/proc` files in order to function
 
-== How to [compile/use/implement]
+== How to use
 
-TBD
-// add instructions how people can start to use your project
+=== Requirements
+
+- Java version 1.8
+- Maven
+
+=== Installation
+
+Include the following dependency into your project's pom.xml file:
+
+    <dependency>
+      <groupId>com.teragrep</groupId>
+      <artifactId>jos_01</artifactId>
+    </dependency>
+
+=== Usage
+
+==== Operating system statistics
+
+Start by creating a LinuxOS object.
+Optionally provide a configuration object by implementing `SysconfInterface` to manually configure the Operating system CPU tick rate.
+Use methods of LinuxOS object to get information on operating system.
+
+==== Process statistics
+Create a Process object by supplying a valid process ID to Process' constructor.
+Optionally provide a specific LinuxOS object during construction, so that OS configuration is applied to Process object's methods.
+
+
+=== Examples of use
+
+==== Creating a new LinuxOS object with automatic configuration
+
+    LinuxOS os = new LinuxOS();
+
+==== Creating a new Process object with automatic configuration
+
+    Process process = new Process(250);
+
+==== Creating a new LinuxOS object with manual CPU tickrate configuration
+
+    LinuxOS os = new LinuxOS(SysconfInterface.Fake(100));
+
+==== CPU count of current system
+
+    LinuxOS os = new LinuxOS();
+    System.out.println(os.cpuCount());
+
+==== Manually configure CPU tickrate and get CpuTime of process with ID 1
+
+    LinuxOS os = new LinuxOS(SysconfInterface.Fake(1000));
+    Process process = new Process(1,os);
+    System.out.println(process.cpuTime());
+
+==== Access /proc/stat files of process with ID 250 and print out "comm" value
+
+    Process process = new Process(250);
+    Stat stat = process.stat();
+    System.out.println(stat.comm());
 
 == Contributing
-
-// Change the repository name in the issues link to match with your project's name
 
 You can involve yourself with our project by https://github.com/teragrep/jos_01/issues/new/choose[opening an issue] or submitting a pull request.
 

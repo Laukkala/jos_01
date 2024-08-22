@@ -30,7 +30,6 @@
   <properties>
     <changelist>-SNAPSHOT</changelist>
     <java.version>1.8</java.version>
-    <junit.version>4.12</junit.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,12 +38,41 @@
     <sha1></sha1>
   </properties>
   <dependencies>
+    <!-- slf4j -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.6</version>
+      <scope>test</scope>
+    </dependency>
     <!-- Test libraries -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.9.2</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <version>1.9.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>5.5.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -76,9 +104,90 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.15</version>
+        <inherited>false</inherited>
+        <configuration>
+          <addDefaultLicenseMatchers>false</addDefaultLicenseMatchers>
+          <licenses>
+            <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
+              <notes>Also allow the license url to be https.</notes>
+              <patterns>
+                <pattern>Java Operating System Statistics JOS-01</pattern>
+              </patterns>
+            </license>
+          </licenses>
+          <consoleOutput>true</consoleOutput>
+          <excludeSubProjects>false</excludeSubProjects>
+          <excludes>
+            <!-- git -->
+            <exclude>.git/**</exclude>
+            <exclude>.gitattributes</exclude>
+            <exclude>.gitignore</exclude>
+            <exclude>.gitmodules</exclude>
+            <!-- ci -->
+            <exclude>.github/**</exclude>
+            <exclude>toolchains.xml</exclude>
+            <exclude>settings.xml</exclude>
+            <!-- readme -->
+            <exclude>README.adoc</exclude>
+            <!-- spotless formatter -->
+            <exclude>eclipse-java-formatter.xml</exclude>
+          </excludes>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>test</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <source>8</source>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.4.0</version>
+        <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${project.basedir}/target/jos_01/src/main/c/.libs</additionalClasspathElement>
+          </additionalClasspathElements>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>2.43.0</version>
+        <version>2.30.0</version>
         <configuration>
           <java>
             <eclipse>
@@ -99,9 +208,9 @@
               <keepBlankLines>false</keepBlankLines>
               <nrOfIndentSpace>2</nrOfIndentSpace>
               <predefinedSortOrder>recommended_2008_06</predefinedSortOrder>
-              <sortProperties>true</sortProperties>
-              <sortModules>true</sortModules>
-              <sortExecutions>true</sortExecutions>
+              <sortProperties>false</sortProperties>
+              <sortModules>false</sortModules>
+              <sortExecutions>false</sortExecutions>
             </sortPom>
           </pom>
           <formats>
@@ -144,6 +253,141 @@
               <goal>report</goal>
             </goals>
             <phase>prepare-package</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy-sources</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <executable>cp</executable>
+              <arguments>
+                <argument>-a</argument>
+                <argument>${project.build.directory}/../src/main/c/.</argument>
+                <argument>.</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}/${project.artifactId}/src/main/c</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>autoreconf</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <executable>autoreconf</executable>
+              <arguments>
+                <argument>-fvi</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}/${project.artifactId}/src/main/c</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>configure</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>process-sources</phase>
+            <configuration>
+              <executable>./configure</executable>
+              <arguments>
+                <argument>--prefix=/opt/teragrep/${project.artifactId}</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}/${project.artifactId}/src/main/c</workingDirectory>
+              <environmentVariables>
+                <LDFLAGS>-pie -Wl,-z,relro -Wl,-z,now</LDFLAGS>
+                <LD_LIBRARY_PATH></LD_LIBRARY_PATH>
+                <LIBS>-ldl -lrt</LIBS>
+                <CFLAGS>-ggdb -fpie -fPIC -std=c99 -DHAVE_ATOMIC_BUILTINS64 -D_DEFAULT_SOURCE</CFLAGS>
+              </environmentVariables>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>compile</phase>
+            <configuration>
+              <executable>make</executable>
+              <arguments>
+                <argument>-j1</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}/${project.artifactId}/src/main/c</workingDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make-install</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <phase>prepare-package</phase>
+            <configuration>
+              <executable>make</executable>
+              <arguments>
+                <argument>-j1</argument>
+                <argument>install</argument>
+                <argument>DESTDIR=${project.build.directory}/classes/lib</argument>
+              </arguments>
+              <workingDirectory>${project.build.directory}/${project.artifactId}/src/main/c</workingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <Class-Path>lib/</Class-Path>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.2</version>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>resolveCiFriendliesOnly</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten.clean</id>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+            <phase>clean</phase>
+          </execution>
+          <execution>
+            <id>flatten</id>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+            <phase>process-resources</phase>
           </execution>
         </executions>
       </plugin>

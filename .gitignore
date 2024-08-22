@@ -1,0 +1,32 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+
+# Editor-based HTTP Client requests
+/httpRequests/
+
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# intelliJ IDEA project files
+.idea/
+*.iml
+
+# maven target files
+target/
+**/target/
+
+# maven flattened pom files
+**/.flattened-pom.xml
+
+# tmp files
+/tmp/
+
+# Git properties
+**/git.properties

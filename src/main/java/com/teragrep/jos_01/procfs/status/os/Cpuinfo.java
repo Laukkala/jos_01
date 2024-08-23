@@ -65,11 +65,11 @@ public class Cpuinfo implements Text {
     public Cpuinfo(Text origin) throws Exception {
         fields = new NonEmptyLines(new Replaced(origin, "\\s+", " ")).read();
         this.processors = new ArrayList<Processor>();
-        ArrayList<String> processorFields = new ArrayList<>();
+        Map<String, String> processorFields = new HashMap();
         for (String field : fields) {
             if (field.startsWith("processor") && processorFields.size() != 0) {
                 processors.add(new Processor(processorFields));
-                processorFields = new ArrayList<>();
+                processorFields = new HashMap<>();
             }
             ArrayList<String> keyValuePair = new Trimmed(new CharacterDelimited((new TimeaddedText(field)), ":"))
                     .read();
@@ -83,7 +83,7 @@ public class Cpuinfo implements Text {
                 value = keyValuePair.get(1);
             }
 
-            processorFields.add(value);
+            processorFields.put(key, value);
         }
         processors.add(new Processor(processorFields));
         this.timestamp = origin.timestamp();
@@ -159,39 +159,41 @@ public class Cpuinfo implements Text {
         private final String[] vmx_flags;
         private final String[] bugs;
         private final float bogomips;
+        private final String TLB_size;
         private final int clflush_size;
         private final int cache_alignment;
         private final String[] address_sizes;
         private final String power_management;
 
-        Processor(ArrayList<String> processorFields) {
-            this.processor = Integer.parseInt(processorFields.get(0));
-            this.vendor_id = processorFields.get(1);
-            this.cpu_family = processorFields.get(2);
-            this.model = processorFields.get(3);
-            this.model_name = processorFields.get(4);
-            this.stepping = Integer.parseInt(processorFields.get(5));
-            this.microcode = processorFields.get(6);
-            this.cpu_MHz = Float.parseFloat(processorFields.get(7));
-            this.cache_size = processorFields.get(8);
-            this.physical_id = Integer.parseInt(processorFields.get(9));
-            this.siblings = Integer.parseInt(processorFields.get(10));
-            this.core_id = Integer.parseInt(processorFields.get(11));
-            this.cpu_cores = Integer.parseInt(processorFields.get(12));
-            this.apicid = Integer.parseInt(processorFields.get(13));
-            this.initial_apicid = Integer.parseInt(processorFields.get(14));
-            this.fpu = processorFields.get(15);
-            this.fpu_exception = processorFields.get(16);
-            this.cpuid_level = Integer.parseInt(processorFields.get(17));
-            this.wp = processorFields.get(18);
-            this.flags = processorFields.get(19).split(" ");
-            this.vmx_flags = processorFields.get(20).split(" ");
-            this.bugs = processorFields.get(21).split(" ");
-            this.bogomips = Float.parseFloat(processorFields.get(22));
-            this.clflush_size = Integer.parseInt(processorFields.get(23));
-            this.cache_alignment = Integer.parseInt(processorFields.get(24));
-            this.address_sizes = processorFields.get(25).split(",");
-            this.power_management = processorFields.get(26);
+        Processor(Map<String, String> processorFields) {
+            this.processor = Integer.parseInt(processorFields.getOrDefault("processor", ""));
+            this.vendor_id = processorFields.getOrDefault("vendor_id", "");
+            this.cpu_family = processorFields.getOrDefault("cpu family", "");
+            this.model = processorFields.getOrDefault("model", "");
+            this.model_name = processorFields.getOrDefault("model name", "");
+            this.stepping = Integer.parseInt(processorFields.getOrDefault("stepping", ""));
+            this.microcode = processorFields.getOrDefault("microcode", "");
+            this.cpu_MHz = Float.parseFloat(processorFields.getOrDefault("cpu MHz", ""));
+            this.cache_size = processorFields.getOrDefault("cache size", "");
+            this.physical_id = Integer.parseInt(processorFields.getOrDefault("physical id", ""));
+            this.siblings = Integer.parseInt(processorFields.getOrDefault("siblings", ""));
+            this.core_id = Integer.parseInt(processorFields.getOrDefault("core id", ""));
+            this.cpu_cores = Integer.parseInt(processorFields.getOrDefault("cpu cores", ""));
+            this.apicid = Integer.parseInt(processorFields.getOrDefault("apicid", ""));
+            this.initial_apicid = Integer.parseInt(processorFields.getOrDefault("initial apicid", ""));
+            this.fpu = processorFields.getOrDefault("fpu", "");
+            this.fpu_exception = processorFields.getOrDefault("fpu_exception", "");
+            this.cpuid_level = Integer.parseInt(processorFields.getOrDefault("cpuid level", ""));
+            this.wp = processorFields.getOrDefault("wp", "");
+            this.flags = processorFields.getOrDefault("flags", "").split(" ");
+            this.vmx_flags = processorFields.getOrDefault("vmx_flags", "").split(" ");
+            this.bugs = processorFields.getOrDefault("bugs", "").split(" ");
+            this.bogomips = Float.parseFloat(processorFields.getOrDefault("bogomips", ""));
+            this.TLB_size = processorFields.getOrDefault("TLB size", "");
+            this.clflush_size = Integer.parseInt(processorFields.getOrDefault("clflush size", ""));
+            this.cache_alignment = Integer.parseInt(processorFields.getOrDefault("cache_alignment", ""));
+            this.address_sizes = processorFields.getOrDefault("address sizes", "").split(",");
+            this.power_management = processorFields.getOrDefault("power management", "");
         }
 
         Processor(
@@ -218,6 +220,7 @@ public class Cpuinfo implements Text {
                 String vmx_flags,
                 String bugs,
                 String bogomips,
+                String TLB_size,
                 String clflush_size,
                 String cache_alignment,
                 String address_sizes,
@@ -247,6 +250,7 @@ public class Cpuinfo implements Text {
             this.vmx_flags = vmx_flags.split(" ");
             this.bugs = bugs.split(" ");
             this.bogomips = Float.parseFloat(bogomips);
+            this.TLB_size = TLB_size;
             this.clflush_size = Integer.parseInt(clflush_size);
             this.cache_alignment = Integer.parseInt(cache_alignment);
             this.address_sizes = address_sizes.split(", ");

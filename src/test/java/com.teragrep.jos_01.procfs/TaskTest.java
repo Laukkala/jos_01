@@ -141,7 +141,9 @@ public class TaskTest {
             Process systemd = new Process(1);
             Task task = systemd.tasks().get(0);
             Stat stat = task.stat();
+            Thread.sleep(1);
             Stat stat2 = task.stat();
+            Thread.sleep(1);
             Statm statm = task.statm();
 
             // Timestamps should always have a value

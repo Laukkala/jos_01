@@ -302,7 +302,9 @@ public class ProcessTest {
         Assertions.assertDoesNotThrow(() -> {
             systemd = new Process(1);
             Stat stat = systemd.stat();
+            Thread.sleep(1);
             Stat stat2 = systemd.stat();
+            Thread.sleep(1);
             Statm statm = systemd.statm();
 
             // Timestamps should always have a value
